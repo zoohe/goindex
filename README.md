@@ -16,7 +16,7 @@ Google Drive Directory Index
 3、复制代码 到 CloudFlare 部署。  
 
 ## 更新内容
-1.文件大小显示修改  
+1.文件大小显示修改（bytes,KB,MB,GB）  
 2.列表以文件名排序  
-3.文件修改时间修改  
+3.文件修改时间修改（YYYY-MM-DD hh:mm:ss）  
 4.用户名密码认证功能
