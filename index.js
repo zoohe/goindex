@@ -1,17 +1,75 @@
 var authConfig = {
-    "siteName": "GoIndex",
+    "siteName": "GD仓库",
     "client_id": "202264815644.apps.googleusercontent.com",
-    "client_secret": "X4Z3ca8xfWDb1Voo-F9a7ZxJ",
+    "client_secret": "X4Z3ca8xfWDb1Voo-Fsd53xJ",
     "refresh_token": "",
     "root": ""
 };
 
+/** http basic auth **/
+// https://tool.oschina.net/encrypt?type=3
+// gd:example
+const authorization = "Basic Z2Q6ZXhhbXBsZQ==";
+/** http basic auth **/
 var gd;
-
 addEventListener('fetch', event => {
-    event.respondWith(handleRequest(event.request))
+  console.log(event.request.headers.get("Authorization"));
+  if (event.request.headers.get("Authorization") !== authorization) {
+    return event.respondWith(new Response(
+      null, {
+        status: 401,
+        statusText: "'Authentication required.'",
+        body: "Unauthorized",
+        headers: {
+          "WWW-Authenticate": 'Basic realm="User Visible Realm"'
+        }
+      }
+    ))
+  }
+  event.respondWith(handleRequest(event.request))
 })
 
+//时间转换
+function utc2beijing(utc_datetime) {
+    // 转为正常的时间格式 年-月-日 时:分:秒
+    var T_pos = utc_datetime.indexOf('T');
+    var Z_pos = utc_datetime.indexOf('Z');
+    var year_month_day = utc_datetime.substr(0,T_pos);
+    var hour_minute_second = utc_datetime.substr(T_pos+1,Z_pos-T_pos-1);
+    var new_datetime = year_month_day+" "+hour_minute_second; // 2017-03-31 08:02:06
+
+    // 处理成为时间戳
+    timestamp = new Date(Date.parse(new_datetime));
+    timestamp = timestamp.getTime();
+    timestamp = timestamp/1000;
+
+    // 增加8个小时，北京时间比utc时间多八个时区
+    var unixtimestamp = timestamp+8*60*60;
+
+    // 时间戳转为时间
+    var unixtimestamp = new Date(unixtimestamp*1000);
+        var year = 1900 + unixtimestamp.getYear();
+        var month = "0" + (unixtimestamp.getMonth() + 1);
+        var date = "0" + unixtimestamp.getDate();
+        var hour = "0" + unixtimestamp.getHours();
+        var minute = "0" + unixtimestamp.getMinutes();
+        var second = "0" + unixtimestamp.getSeconds();
+        return year + "-" + month.substring(month.length-2, month.length)  + "-" + date.substring(date.length-2, date.length)
+            + " " + hour.substring(hour.length-2, hour.length) + ":"
+            + minute.substring(minute.length-2, minute.length) + ":"
+            + second.substring(second.length-2, second.length);
+} 
+
+// bytes自适应转换到KB,MB,GB
+function formatFileSize(bytes) {
+	if (bytes>=1000000000) {bytes=(bytes/1000000000).toFixed(2)+' GB';}
+        else if (bytes>=1000000)    {bytes=(bytes/1000000).toFixed(2)+' MB';}
+        else if (bytes>=1000)       {bytes=(bytes/1000).toFixed(2)+' KB';}
+        else if (bytes>1)           {bytes=bytes+' bytes';}
+        else if (bytes==1)          {bytes=bytes+' byte';}
+        else                        {bytes='0 byte';}
+        return bytes;
+}
 /**
  * Fetch and log a request
  * @param {Request} request
@@ -99,7 +157,7 @@ class googleDrive {
       let url = 'https://www.googleapis.com/drive/v3/files';
       let params = {'includeItemsFromAllDrives':true,'supportsAllDrives':true};
       params.q = `'${parent}' in parents and trashed = false`;
-      params.orderBy= 'folder,modifiedTime desc,name';
+      params.orderBy= 'folder,name,modifiedTime desc';
       params.fields = "nextPageToken, files(id, name, mimeType, size , modifiedTime)";
       params.pageSize = 1000;
       url += '?'+this.enQuery(params);
@@ -262,6 +320,7 @@ class view{
       console.log(item);
       let p = path+item.name+'/';
       let d = new Date(item['modifiedTime']);
+	  item['modifiedTime'] = utc2beijing(item['modifiedTime']);
       if(item['size']==undefined){
         item['size'] = "";
       }
@@ -277,6 +336,7 @@ class view{
           </li>`;
       }else{
         let p = path+item.name;
+		item['size'] = formatFileSize(item['size']);
         html += `<li class="mdui-list-item file mdui-ripple" target="_blank"><a href="${p}">
             <div class="mdui-col-xs-12 mdui-col-sm-7 mdui-text-truncate">
             <i class="mdui-icon material-icons">insert_drive_file</i>
