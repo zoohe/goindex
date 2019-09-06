@@ -14,3 +14,9 @@ Google Drive Directory Index
 1、访问[https://install.gd.workers.dev/](https://install.gd.workers.dev/)  
 2、授权认证后，生成部署代码。  
 3、复制代码 到 CloudFlare 部署。  
+
+## 更新内容
+1.文件大小显示修改
+2.列表以文件名排序
+3.文件修改时间修改
+4.用户名密码认证功能
