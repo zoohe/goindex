@@ -372,6 +372,27 @@ class view{
 	<title>${title}</title>
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mdui@0.4.1/dist/css/mdui.min.css" integrity="sha256-lCFxSSYsY5OMx6y8gp8/j6NVngvBh3ulMtrf4SX5Z5A=" crossorigin="anonymous">
 	<script src="https://cdn.jsdelivr.net/npm/mdui@0.4.1/dist/js/mdui.min.js" integrity="sha256-dZxrLDxoyEQADIAGrWhPtWqjDFvZZBigzArprSzkKgI=" crossorigin="anonymous"></script>
+    <script src="https://cdn.staticfile.org/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.org/layer/2.3/layer.js"></script>
+    <script>
+    $(function () {
+        $('.file a').each(function() {
+          $(this).on('click', function() {
+              if(this.href.lastIndexOf(".mkv") > 1) {
+                layer.open({
+                  type: 1,
+                  title: decodeURI(this.href.substring(this.href.lastIndexOf("/") + 1, this.href.length)),
+                  shadeClose: true,
+                  shade: 0.8,
+                  area: ['100%', '100%'],
+                  content: '<center><video controls autoplay=true preload=auto style="width:80%;object-fit: cover;" src="' + this.href + '"></video></center>'
+                });
+                return false;
+              }
+          });
+      });
+    });
+    </script>
 	<style>
 		.mdui-appbar .mdui-toolbar{
 			height:56px;
